@@ -1,8 +1,8 @@
 # Log
-A description of this package.
+- Version: 0.0.1  
+- Modify date: 21/12/24  
 
 ## Requirements
-- iOS 12.0+ / macOS 10.14+
-- Xcode 12.0+
-- Swift 5.3+
-
+- iOS 13.0 + / macOS 10.15 +
+- Xcode 13.2 +
+- Swift 5.5 +

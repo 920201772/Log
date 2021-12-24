@@ -4,7 +4,9 @@ import XCTest
 final class LogTests: XCTestCase {
     
     func testExample() {
-        Log.init()
+        print(Log.fileDescriptor)
+        print(Log.enableLevels)
+        Log.info("11111")
     }
 
     static var allTests = [

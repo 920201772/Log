@@ -6,21 +6,16 @@ import PackageDescription
 let package = Package(
     name: "Log",
     platforms: [
-        .iOS(.v12),
-        .macOS(.v10_14)
+        .iOS(.v13),
+        .macOS(.v10_15)
     ],
     products: [
         .library(
             name: "Log",
             targets: ["Log"]),
     ],
-    dependencies: [
-        .package(url: "https://github.com/apple/swift-log.git", .upToNextMajor(from: "1.4.2"))
-    ],
     targets: [
-        .target(
-            name: "Log",
-            dependencies: []),
+        .target(name: "Log"),
         .testTarget(
             name: "LogTests",
             dependencies: ["Log"]),
