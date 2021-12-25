@@ -12,12 +12,21 @@ let package = Package(
     products: [
         .library(
             name: "Log",
-            targets: ["Log"]),
+            targets: ["Log"])
     ],
     targets: [
-        .target(name: "Log"),
+        .target(
+            name: "Mongoose",
+            path: "Sources/Log/Framework/Mongoose"),
+        .target(
+            name: "Log",
+            dependencies: ["Mongoose"],
+            path: "Sources/Log",
+            exclude: ["Framework"],
+            resources: [
+                .process("Other")]),
         .testTarget(
             name: "LogTests",
-            dependencies: ["Log"]),
+            dependencies: ["Log"])
     ]
 )

@@ -20,6 +20,17 @@ public final class Log {
             }
         }
     }
+    /// 默认从启动参数 (-Log.http <servicePort> <socketPort>) 解析.
+    public static var httpDescriptor: HTTPDescriptor? {
+        get { shared.handler.http?.descriptor }
+        set {
+            if let descriptor = newValue {
+                shared.handler.http = try! .init(descriptor: descriptor)
+            } else {
+                shared.handler.http = nil
+            }
+        }
+    }
     /// 默认从启动参数 (-Log.level <name>) 解析.
     public static var enableLevels: Set<Level> {
         get { shared.enableLevels }
@@ -37,6 +48,9 @@ public final class Log {
 
         if let descriptor = arguments["Log.file"] {
             handler.file = try! .init(descriptor: .init(directory: descriptor[0], maxSize: .init(descriptor[1])!, maxTotalSize: .init(descriptor[2])!))
+        }
+        if let descriptor = arguments["Log.http"] {
+            handler.http = try! .init(descriptor: .init(servicePort: descriptor[0], socketPort: descriptor[1]))
         }
         arguments["Log.level"]?.forEach {
             enableLevels.insert(.init(rawValue: $0))

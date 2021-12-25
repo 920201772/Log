@@ -12,6 +12,7 @@ extension Log {
     final class Handler {
 
         var file: File?
+        var http: HTTP?
 
     }
 
@@ -28,6 +29,19 @@ extension Log.Handler {
         if let file = self.file {
             let text = getText()
             try file.writeFile(text)
+
+            if let http = http {
+                http.socket.send(text: text)
+            }
+
+            #if !RELEASE
+            print(text, terminator: "")
+            #endif
+
+            return
+        } else if let http = http {
+            let text = getText()
+            http.socket.send(text: text)
 
             #if !RELEASE
             print(text, terminator: "")

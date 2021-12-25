@@ -4,9 +4,18 @@ import XCTest
 final class LogTests: XCTestCase {
     
     func testExample() {
-        print(Log.fileDescriptor)
+        if let descriptor = Log.fileDescriptor {
+            print(descriptor)
+        }
+        if let descriptor = Log.httpDescriptor {
+            print(descriptor)
+        }
         print(Log.enableLevels)
-        Log.info("11111")
+
+        while true {
+            Thread.sleep(forTimeInterval: 1)
+            Log.info("11111")
+        }
     }
 
     static var allTests = [
