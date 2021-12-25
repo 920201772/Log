@@ -16,6 +16,7 @@ extension Net.HTTP {
 
         private let listener: NWListener
         private let queue = DispatchQueue(label: "Log.HTTP.Socket", qos: .default)
+        private let context = NWConnection.ContentContext(identifier: "Log.HTTP.Socket", metadata: [NWProtocolWebSocket.Metadata(opcode: .binary)])
 
         init(port: String) throws {
             guard let port = NWEndpoint.Port(port) else { throw Error.port }
@@ -30,17 +31,14 @@ extension Net.HTTP {
                 guard let self = self else { return }
                 self.connections.append(connection)
                 connection.stateUpdateHandler = {
-                    print("-- \($0)")
                     switch $0 {
                     case .setup, .waiting, .preparing, .ready:
                         break
 
                     case .failed, .cancelled:
-                        break
-//                        connection.cancel()
-//                        if let index = self.connections.firstIndex(where: { $0 === connection }) {
-//                            print("-- \(self.connections.remove(at: index))")
-//                        }
+                        if let index = self.connections.firstIndex(where: { $0 === connection }) {
+                            self.connections.remove(at: index)
+                        }
 
                     @unknown default:
                         break
@@ -61,7 +59,7 @@ extension Net.HTTP.Socket {
 
     func send(text: String) {
         connections.forEach {
-            $0.send(content: text.data(using: .utf8), completion: .contentProcessed({ _ in }))
+            $0.send(content: text.data(using: .utf8), contentContext: context, isComplete: true, completion: .contentProcessed({ _ in }))
         }
     }
 
