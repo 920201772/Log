@@ -23,8 +23,11 @@ let package = Package(
             dependencies: ["Mongoose"],
             path: "Sources/Log",
             exclude: ["Framework"],
-            resources: [
-                .process("Other")]),
+            resources: [.process("Other")],
+            swiftSettings: [
+                .define("RELEASE", .when(configuration: .release)),
+                .define("DEBUG", .when(configuration: .debug)),
+            ]),
         .testTarget(
             name: "LogTests",
             dependencies: ["Log"])
