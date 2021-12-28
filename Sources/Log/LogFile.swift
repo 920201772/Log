@@ -122,6 +122,12 @@ public extension Log {
         /// 所有文件最大大小, 单位字节.
         public let maxTotalSize: Int
 
+        public init(directory: String, maxSize: Int, maxTotalSize: Int) {
+            self.directory = directory
+            self.maxSize = maxSize
+            self.maxTotalSize = maxTotalSize
+        }
+
     }
 
 }

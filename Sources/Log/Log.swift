@@ -85,11 +85,87 @@ public extension Log {
 
     static func net(_ message: @autoclosure () -> Any, file: String = #file, function: String = #function, line: UInt = #line) {
         Logging(level: .net, message: message(), file: file, function: function, line: line)
-    } 
+    }
+
+    static func object(_ object: NSObject, type: ObjectType, level: Log.Level = .debug, file: String = #file, function: String = #function, line: UInt = #line) {
+        let message: () -> Any = {
+            object.perform(Selector((type.rawValue)))!.takeUnretainedValue()
+        }
+        Logging(level: level, message: message(), file: file, function: function, line: line)
+    }
     
 }
 
-// MARK: - Level
+// MARK: - Memory
+public extension Log {
+
+    static func memory(_ memory: UnsafeMutableRawBufferPointer, count: Int, level: Log.Level = .debug, file: String = #file, function: String = #function, line: UInt = #line) {
+        let message: () -> String = {
+            func showCharacter(ascii: UInt8) -> Character {
+                if ascii.contains(to: 0x21...0x7E) {
+                    return Character(Unicode.Scalar(ascii))
+                } else {
+                    return Character(Unicode.Scalar(0x2E))
+                }
+            }
+
+            let address = "\(memory.baseAddress!)"
+            let newCount = count.limited(...memory.count)
+            var content = ""
+            var ascii = ""
+            for index in 0..<newCount {
+                if index % 16 == 0 {
+                    content += String(format: "  %@\n%02X", ascii, memory[index])
+                    ascii = "\(showCharacter(ascii: memory[index]))"
+                } else if index % 8 == 0 {
+                    content += String(format: "  %02X", memory[index])
+                    ascii += " \(showCharacter(ascii: memory[index]))"
+                } else {
+                    content += String(format: " %02X", memory[index])
+                    ascii.append(showCharacter(ascii: memory[index]))
+                }
+            }
+
+            let differ = 16 - newCount % 16
+            var fill = ""
+            if differ.contains(to: 1...7) {
+                fill = String(repeating: " ", count: differ * 3)
+            } else if differ.contains(to: 8...15) {
+                fill = String(repeating: " ", count: differ * 3 + 1)
+            }
+            content += "\(fill)  \(ascii)"
+
+            return address + content
+        }
+
+        Logging(level: level, message: message(), file: file, function: function, line: line)
+    }
+
+    static func memory(_ memory: UnsafeRawBufferPointer, count: Int, level: Log.Level = .debug, file: String = #file, function: String = #function, line: UInt = #line) {
+        let mrbp = UnsafeMutableRawBufferPointer(mutating: memory)
+        self.memory(mrbp, count: count, level: level, file: file, function: function, line: line)
+    }
+
+    static func memory<T>(_ memory: UnsafeMutableBufferPointer<T>, count: Int, level: Log.Level = .debug, file: String = #file, function: String = #function, line: UInt = #line) {
+        let mrbp = UnsafeMutableRawBufferPointer(memory)
+        self.memory(mrbp, count: count, level: level, file: file, function: function, line: line)
+    }
+
+    static func memory<T>(_ memory: UnsafeBufferPointer<T>, count: Int, level: Log.Level = .debug, file: String = #file, function: String = #function, line: UInt = #line) {
+        let mbp = UnsafeMutableBufferPointer(mutating: memory)
+        let mrbp = UnsafeMutableRawBufferPointer(mbp)
+        self.memory(mrbp, count: count, level: level, file: file, function: function, line: line)
+    }
+
+    static func memory(_ memory: UnsafeRawPointer, count: Int, level: Log.Level = .debug, file: String = #file, function: String = #function, line: UInt = #line) {
+        let mrp = UnsafeMutableRawPointer(mutating: memory)
+        let mrbp = UnsafeMutableRawBufferPointer(start: mrp, count: count)
+        self.memory(mrbp, count: count, level: level, file: file, function: function, line: line)
+    }
+
+}
+
+// MARK: - Nested
 public extension Log {
 
     struct Level: Hashable {
@@ -105,6 +181,19 @@ public extension Log {
         public init(rawValue: String) {
             self.rawValue = rawValue
         }
+
+    }
+
+    enum ObjectType: String {
+
+        /// 打印对象成员变量.
+        case ivar = "_ivarDescription"
+        /// 打印对象方法.
+        case method = "_methodDescription"
+        /// 打印对象方法 (不包含父类).
+        case shortMethod = "_shortMethodDescription"
+        /// 打印视图 (对象必须是 UIView).
+        case view = "recursiveDescription"
 
     }
 

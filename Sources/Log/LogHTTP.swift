@@ -36,6 +36,11 @@ public extension Log {
         /// Socket 端口.
         public let socketPort: String
 
+        public init(servicePort: String, socketPort: String) {
+            self.servicePort = servicePort
+            self.socketPort = socketPort
+        }
+
     }
 
 }
