@@ -8,12 +8,131 @@
         <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         
         <style type="text/css">
+            button {
+                width: 60.0pt;
+                height: 26.0pt;
+                background-color: deepskyblue;
+                border: 0.0pt;
+                padding: 0.0pt;
+                border-radius: 5.0pt;
+                color: white;
+                font-size: 14.0pt;
+            }
+
+            button:active {
+                opacity: 0.5;
+            }
+
+            button:disabled {
+                background-color: gold;
+                opacity: 1.0;
+            }
+
+            .buttonSelected {
+                background-color: orangered;
+            }
+
+            input {
+                height: 20.0pt;
+                font-size: 14.0pt;
+                border-width: 1.0pt;
+                border-style: solid;
+                border-color: #999999;
+                border-radius: 5.0pt;
+                padding: 2.0pt;
+            }
+
+            textarea {
+                resize: none;
+                margin: 0.0pt;
+                border: 0.0pt;
+                font-size: 14.0pt;
+                color: black;
+                position: absolute;
+                right: 0.0pt;
+                bottom: 0.0pt;
+                left: 0.0pt;
+                padding: 5.0pt;
+                outline: none;
+            }
+
+            .toolBar {
+                height: 44.0pt;
+                position: relative;
+            }
+            
+            .toolBar::after {
+                content: "";
+                position: absolute;
+                right: 0.0pt;
+                bottom: 0.0pt;
+                left: 0.0pt;
+                height: 1.0pt;
+                background-color: #EEEEEE;
+            }
+
+            .alert {
+                display: block;
+                position: fixed;
+                width: 100.0%;
+                height: 100.0%;
+                background-color: rgba(0.0, 0.0, 0.0, 0.5);
+                top: 0.0pt;
+                display: none;
+            }
+
+            .alertContent {
+                position: absolute;
+                width: 300.0pt;
+                height: 400.0pt;
+                background-color:white;
+                top: 50%;
+                left: 50%;
+                margin-top: -200.0pt;
+                margin-left: -150.0pt;
+                border-radius: 20.0pt;
+            }
+
+            .alertTitle {
+                font-size: 15.0pt;
+                font-weight: bold;
+                text-align: center;
+                position: absolute;
+                height: 44.0pt;
+                line-height: 44.0pt;
+                width: 100.0pt;
+                left: 50%;
+                margin-left: -50.0pt;
+            }
+
+            .logLabel {
+                font-size: 14.0pt;
+                padding-left: 5.0pt;
+                padding-right: 5.0pt;
+                margin: 0.0pt;
+                word-break: break-all;
+            }
         </style>
         
     </head>
 
-    <body>
-        @body
+    <body style="margin: 0.0pt;">
+        <div class="toolBar">
+            <button id="setingButton" style="margin-top: 11.0pt; margin-left: 5.0pt;">设置</button>
+            <button id="clearButton" class="buttonSelected" style="margin-top: 11.0pt; margin-left: 5.0pt;">清除</button>
+            <input id="portField" style="float: right; margin-right: 5.0pt; width: 50.0pt; margin-top: 11.0pt;" type="text" placeholder="端口" />
+            <button id="connectButton" style="float: right; margin-top: 11.0pt; margin-right: 5.0pt;">连接</button>
+        </div>
+        <div id="messageTextView" style="top: 44.0pt; position: absolute; right: 0.0pt; bottom: 0.0pt; left: 0.0pt; overflow-y: scroll;"></div>
+        <div id="setingAlert" class="alert">
+            <div class="alertContent" >
+                <div class="toolBar" >
+                    <snap class="alertTitle">设置</snap>
+                    <button id="setingCloseButton" style="float: right; margin-top: 11.0pt; margin-right: 10.0pt;">关闭</button>
+                </div>
+                <textarea id="setingTextView" style="top: 44.0pt; border-bottom-left-radius: 20.0pt; border-bottom-right-radius: 20.0pt;"></textarea>
+            </div>
+        </div>
     </body>
 
     <script type="text/javascript" src="index.js"></script>

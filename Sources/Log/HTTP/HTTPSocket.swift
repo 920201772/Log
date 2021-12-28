@@ -16,7 +16,7 @@ extension Net.HTTP {
 
         private let listener: NWListener
         private let queue = DispatchQueue(label: "Log.HTTP.Socket", qos: .default)
-        private let context = NWConnection.ContentContext(identifier: "Log.HTTP.Socket", metadata: [NWProtocolWebSocket.Metadata(opcode: .binary)])
+        private let context = NWConnection.ContentContext(identifier: "Log.HTTP.Socket", metadata: [NWProtocolWebSocket.Metadata(opcode: .text)])
 
         init(port: String) throws {
             guard let port = NWEndpoint.Port(port) else { throw Error.port }
