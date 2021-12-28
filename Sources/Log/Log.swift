@@ -10,6 +10,8 @@ import Foundation
 public final class Log {
 
     /// 默认从启动参数 (-Log.file <directory> <maxSize> <maxTotalSize>) 解析.
+    ///
+    /// ¥(HOME) 为沙盒目路, 示例 "¥(HOME)/Documents "
     public static var fileDescriptor: FileDescriptor? {
         get { shared.handler.file?.descriptor }
         set {
@@ -47,7 +49,12 @@ public final class Log {
         let arguments = CommandLine.arguments.joined(separator: " ").decodeOptions
 
         if let descriptor = arguments["Log.file"] {
-            handler.file = try! .init(descriptor: .init(directory: descriptor[0], maxSize: .init(descriptor[1])!, maxTotalSize: .init(descriptor[2])!))
+            var directory = descriptor[0]
+            if let index = directory.range(of: "¥(HOME)") {
+                directory.replaceSubrange(index, with: NSHomeDirectory())
+            }
+
+            handler.file = try! .init(descriptor: .init(directory: directory, maxSize: .init(descriptor[1])!, maxTotalSize: .init(descriptor[2])!))
         }
         if let descriptor = arguments["Log.http"] {
             handler.http = try! .init(descriptor: .init(servicePort: descriptor[0], socketPort: descriptor[1]))
