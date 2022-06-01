@@ -16,8 +16,7 @@ extension Net.HTTP {
 
         private let listener: NWListener
         private let queue = DispatchQueue(label: "Log.Net.HTTP.Socket", qos: .default)
-        @available(iOS 13.0, *)
-        private let context = NWConnection.ContentContext(identifier: "Log.Net.HTTP.Socket", metadata: [NWProtocolWebSocket.Metadata(opcode: .text)])
+        private let context: NWConnection.ContentContext
 
         deinit {
             listener.cancel()
@@ -29,7 +28,8 @@ extension Net.HTTP {
             }
             
             guard let port = NWEndpoint.Port(port) else { throw Net.Error.port }
-
+            context = .init(identifier: queue.label, metadata: [NWProtocolWebSocket.Metadata(opcode: .text)])
+            
             let parameters = NWParameters.tcp
             let options = NWProtocolWebSocket.Options()
             options.autoReplyPing = true
