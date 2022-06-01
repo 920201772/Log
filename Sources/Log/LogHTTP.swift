@@ -18,7 +18,7 @@ extension Log {
 
         init(descriptor: HTTPDescriptor) throws {
             self.descriptor = descriptor
-            service = Net.HTTP.Service(port: descriptor.servicePort)
+            service = try Net.HTTP.Service(port: descriptor.servicePort)
             socket = try Net.HTTP.Socket(port: descriptor.socketPort)
         }
 

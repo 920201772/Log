@@ -9,9 +9,6 @@ import Foundation
 
 public final class Log {
 
-    /// 默认从启动参数 (-Log.file <directory> <maxSize> <maxTotalSize>) 解析.
-    ///
-    /// ¥(HOME) 为沙盒目路, 示例 "¥(HOME)/Documents "
     public static var fileDescriptor: FileDescriptor? {
         get { shared.handler.file?.descriptor }
         set {
@@ -22,18 +19,16 @@ public final class Log {
             }
         }
     }
-    /// 默认从启动参数 (-Log.http <servicePort> <socketPort>) 解析.
     public static var httpDescriptor: HTTPDescriptor? {
         get { shared.handler.http?.descriptor }
         set {
             if let descriptor = newValue {
-                shared.handler.http = try! .init(descriptor: descriptor)
+                shared.handler.http = try? .init(descriptor: descriptor)
             } else {
                 shared.handler.http = nil
             }
         }
     }
-    /// 默认从启动参数 (-Log.level <name>) 解析.
     public static var enableLevels: Set<Level> {
         get { shared.enableLevels }
         set { shared.enableLevels = newValue }
@@ -45,60 +40,70 @@ public final class Log {
 
     private var enableLevels: Set<Level> = []
     
-    private init() {
-        let arguments = CommandLine.arguments.joined(separator: " ").decodeOptions
+    private init() {}
+    
+}
+
+// MARK: - Public
+public extension Log {
+
+    /// -Log.file \<directory> \<maxSize> \<maxTotalSize> -Log.http \<servicePort> \<socketPort> -Log.level \<name>
+    ///
+    /// \<directory>: ¥HOME 为沙盒目路, 示例 "¥HOME/Documents "
+    static func setArguments(_ arguments: String) {
+        let arguments = arguments.decodeOptions
 
         if let descriptor = arguments["Log.file"] {
             var directory = descriptor[0]
-            if let index = directory.range(of: "¥(HOME)") {
+            if let index = directory.range(of: "¥HOME") {
                 directory.replaceSubrange(index, with: NSHomeDirectory())
             }
 
-            handler.file = try! .init(descriptor: .init(directory: directory, maxSize: .init(descriptor[1])!, maxTotalSize: .init(descriptor[2])!))
+            shared.handler.file = try! .init(descriptor: .init(directory: directory, maxSize: .init(descriptor[1])!, maxTotalSize: .init(descriptor[2])!))
         }
         if let descriptor = arguments["Log.http"] {
-            handler.http = try! .init(descriptor: .init(servicePort: descriptor[0], socketPort: descriptor[1]))
+            shared.handler.http = try? .init(descriptor: .init(servicePort: descriptor[0], socketPort: descriptor[1]))
         }
         arguments["Log.level"]?.forEach {
             enableLevels.insert(.init(rawValue: $0))
         }
     }
+
+    static func level(_ level: Log.Level, message: @autoclosure () -> Any, file: String = #file, function: String = #function, line: UInt = #line) {
+        if !Log.enableLevels.contains(level) { return }
+        try! Log.shared.handler.log(level: level, message: message(), file: file, function: function, line: line)
+    }
     
-}
-
-// MARK: - Public
-public func Logging(level: Log.Level, message: @autoclosure () -> Any, file: String = #file, function: String = #function, line: UInt = #line) {
-    if !Log.enableLevels.contains(level) { return }
-    try! Log.shared.handler.log(level: level, message: message(), file: file, function: function, line: line)
-}
-
-public extension Log {
-
     static func debug(_ message: @autoclosure () -> Any, file: String = #file, function: String = #function, line: UInt = #line) {
-        Logging(level: .debug, message: message(), file: file, function: function, line: line)
+        level(.debug, message: message(), file: file, function: function, line: line)
     }
 
     static func info(_ message: @autoclosure () -> Any, file: String = #file, function: String = #function, line: UInt = #line) {
-        Logging(level: .info, message: message(), file: file, function: function, line: line)
+        level(.info, message: message(), file: file, function: function, line: line)
     }
 
     static func warning(_ message: @autoclosure () -> Any, file: String = #file, function: String = #function, line: UInt = #line) {
-        Logging(level: .warning, message: message(), file: file, function: function, line: line)
+        level(.warning, message: message(), file: file, function: function, line: line)
     }
 
     static func error(_ message: @autoclosure () -> Any, file: String = #file, function: String = #function, line: UInt = #line) {
-        Logging(level: .error, message: message(), file: file, function: function, line: line)
+        level(.error, message: message(), file: file, function: function, line: line)
     }
 
     static func net(_ message: @autoclosure () -> Any, file: String = #file, function: String = #function, line: UInt = #line) {
-        Logging(level: .net, message: message(), file: file, function: function, line: line)
+        level(.net, message: message(), file: file, function: function, line: line)
     }
+    
+}
 
-    static func object(_ object: NSObject, type: ObjectType, level: Log.Level = .debug, file: String = #file, function: String = #function, line: UInt = #line) {
+// MARK: - Object
+public extension Log {
+    
+    static func object(_ object: NSObject, operation: Operation, level: Log.Level = .debug, file: String = #file, function: String = #function, line: UInt = #line) {
         let message: () -> Any = {
-            object.perform(Selector((type.rawValue)))!.takeUnretainedValue()
+            object.perform(Selector((operation.rawValue)))!.takeUnretainedValue()
         }
-        Logging(level: level, message: message(), file: file, function: function, line: line)
+        self.level(level, message: message(), file: file, function: function, line: line)
     }
     
 }
@@ -145,7 +150,7 @@ public extension Log {
             return address + content
         }
 
-        Logging(level: level, message: message(), file: file, function: function, line: line)
+        self.level(level, message: message(), file: file, function: function, line: line)
     }
 
     static func memory(_ memory: UnsafeRawBufferPointer, count: Int, level: Log.Level = .debug, file: String = #file, function: String = #function, line: UInt = #line) {
@@ -191,7 +196,7 @@ public extension Log {
 
     }
 
-    enum ObjectType: String {
+    enum Operation: String {
 
         /// 打印对象成员变量.
         case ivar = "_ivarDescription"

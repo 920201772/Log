@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "Log",
     platforms: [
-        .iOS(.v13),
+        .iOS(.v12),
         .macOS(.v10_15)
     ],
     products: [
@@ -16,13 +16,8 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "Mongoose",
-            path: "Sources/Log/Framework/Mongoose"),
-        .target(
             name: "Log",
-            dependencies: ["Mongoose"],
             path: "Sources/Log",
-            exclude: ["Framework"],
             resources: [.process("Other")],
             swiftSettings: [
                 .define("RELEASE", .when(configuration: .release)),

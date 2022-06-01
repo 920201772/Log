@@ -1,8 +1,8 @@
 # Log
-- Version: 0.0.1  
-- Modify date: 21/12/24  
+- Version: 0.0.2
+- Modify date: 22/06/01  
 
 ## Requirements
-- iOS 13.0 + / macOS 10.15 +
+- iOS 12.0 + / macOS 10.15 +
 - Xcode 13.2 +
 - Swift 5.5 +

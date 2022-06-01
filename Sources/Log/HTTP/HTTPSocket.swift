@@ -15,11 +15,19 @@ extension Net.HTTP {
         private var connections: ContiguousArray<NWConnection> = []
 
         private let listener: NWListener
-        private let queue = DispatchQueue(label: "Log.HTTP.Socket", qos: .default)
-        private let context = NWConnection.ContentContext(identifier: "Log.HTTP.Socket", metadata: [NWProtocolWebSocket.Metadata(opcode: .text)])
+        private let queue = DispatchQueue(label: "Log.Net.HTTP.Socket", qos: .default)
+        private let context = NWConnection.ContentContext(identifier: "Log.Net.HTTP.Socket", metadata: [NWProtocolWebSocket.Metadata(opcode: .text)])
 
+        deinit {
+            listener.cancel()
+        }
+        
         init(port: String) throws {
-            guard let port = NWEndpoint.Port(port) else { throw Error.port }
+            if #unavailable(iOS 13.0) {
+                throw Net.Error.version
+            }
+            
+            guard let port = NWEndpoint.Port(port) else { throw Net.Error.port }
 
             let parameters = NWParameters.tcp
             let options = NWProtocolWebSocket.Options()
@@ -61,19 +69,6 @@ extension Net.HTTP.Socket {
         connections.forEach {
             $0.send(content: text.data(using: .utf8), contentContext: context, isComplete: true, completion: .contentProcessed({ _ in }))
         }
-    }
-
-}
-
-// MARK: - Error
-extension Net.HTTP.Socket {
-
-    enum Error: LocalizedError {
-
-        case port
-
-        var errorDescription: String? { "端口错误." }
-
     }
 
 }
