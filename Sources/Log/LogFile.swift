@@ -19,7 +19,7 @@ extension Log {
         private var totalSize: Int
 
         deinit {
-            try? file.close()
+            file.closeFile()
         }
 
         init(descriptor: FileDescriptor) throws {
@@ -98,7 +98,7 @@ private extension Log.File {
     }
 
     func makeFile() throws {
-        try file.close()
+        file.closeFile()
         totalSize += size
 
         try clearFile()
